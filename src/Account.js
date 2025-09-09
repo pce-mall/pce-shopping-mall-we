@@ -28,7 +28,7 @@ const firebaseConfig = {
   projectId: pce-shopping-mall,
   storageBucket: pce-shopping-mall.firebasestorage.app,
   messagingSenderId:10570005342,
-  appId: "YOUR_APP_ID","1:10570005342:web:c30283e51d78a3b879adcf"
+  appId: "1:10570005342:web:c30283e51d78a3b879adcf"
 };
 
 initializeApp(firebaseConfig);
