@@ -1,9 +1,11 @@
-// src/App.js
+import React from "react";
+import ErrorBoundary from "./ErrorBoundary";
+import Account from "./Account";   // Or whatever your main page is
+
 export default function App() {
   return (
-    <div style={{padding: 24, fontFamily: "system-ui"}}>
-      <h1>✅ React is rendering</h1>
-      <p>If you can see this after deploy, the issue is inside your app code, not the setup.</p>
-    </div>
+    <ErrorBoundary>
+      <Account />
+    </ErrorBoundary>
   );
 }
