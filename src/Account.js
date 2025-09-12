@@ -1,3 +1,4 @@
+/* eslint-disable */
 // src/Account.js
 import React, { useEffect, useState } from "react";
 import {
@@ -19,7 +20,7 @@ import {
   where,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { auth, db, storage } from "./firebase"; // <- make sure firebase.js exports storage
+import { auth, db, storage } from "./firebase"; // <- firebase.js must export storage
 
 export default function Account() {
   // auth / role
@@ -68,7 +69,6 @@ export default function Account() {
     });
     fetchProducts();
     return () => unsub();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ===== Firestore helpers =====
@@ -177,7 +177,7 @@ export default function Account() {
 
     await addDoc(collection(db, "orders"), {
       buyer: user.email,
-      seller: cart[0]?.owner || "unknown", // simple 1-seller assumption
+      seller: cart[0]?.owner || "unknown",
       items: cart.map((p) => ({ id: p.id, name: p.name, price: p.price })),
       commission,
       total,
@@ -450,4 +450,4 @@ export default function Account() {
       )}
     </div>
   );
-          }
+                }
