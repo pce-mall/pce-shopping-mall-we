@@ -10,22 +10,41 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [authMode, setAuthMode] = useState("login"); // login | register
+  const [authMode, setAuthMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
 
-  // 🚨 Products will be added by you manually later
-  const [products] = useState([]); 
+  // 🛍️ Add your products here
+  const [products] = useState([
+    {
+      id: 1,
+      name: "Blue Shoes",
+      price: 20000,
+      img: "https://firebasestorage.googleapis.com/v0/b/pce-shopping-mall.appspot.com/o/blue-shoes.jpg?alt=media&token=abc123"
+    },
+    {
+      id: 2,
+      name: "Green Shirt",
+      price: 15000,
+      img: "https://firebasestorage.googleapis.com/v0/b/pce-shopping-mall.appspot.com/o/green-shirt.jpg?alt=media&token=xyz456"
+    },
+    {
+      id: 3,
+      name: "Black Bag",
+      price: 30000,
+      img: "https://firebasestorage.googleapis.com/v0/b/pce-shopping-mall.appspot.com/o/black-bag.jpg?alt=media&token=def789"
+    }
+  ]);
 
-  // Track user login state
+  // Track login
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u || null));
     return () => unsub();
   }, []);
 
-  // Filter products
+  // Filter search
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q.length
@@ -33,7 +52,7 @@ function App() {
       : products;
   }, [search, products]);
 
-  // Cart helpers
+  // Cart functions
   const addToCart = (p) => {
     setCart(prev => {
       const found = prev.find(i => i.id === p.id);
@@ -46,7 +65,7 @@ function App() {
   const decQty = (id) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i));
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
-  // Auth functions
+  // Auth
   const doRegister = async () => {
     if (!email || !password) return alert("Enter email and password");
     try {
@@ -63,7 +82,7 @@ function App() {
   };
   const doLogout = async () => { await signOut(auth); };
 
-  // Checkout with bank transfer
+  // Checkout (Bank Transfer)
   const checkout = async () => {
     if (!user) return alert("Please login first");
     if (!cart.length) return alert("Your cart is empty");
@@ -93,7 +112,7 @@ WhatsApp: +2347089724573
 
   return (
     <div style={{
-      background: "linear-gradient(90deg, blue, green, black)", // 🔵🟢⚫ Gradient background
+      background: "linear-gradient(90deg, blue, green, black)",
       minHeight: "100vh",
       color: "white",
       padding: 20,
