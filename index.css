@@ -1,13 +1,50 @@
-/* Global styles for your app */
-
-body {
+/* Global reset */
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+/* Page background */
+body {
   font-family: Arial, sans-serif;
   background: linear-gradient(90deg, blue, green, black);
   color: white;
+  min-height: 100vh;
 }
 
+/* Links */
+a {
+  color: #1f6feb;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
 button {
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+button:hover {
+  opacity: 0.9;
+}
+
+/* Inputs */
+input {
+  outline: none;
+  font-size: 14px;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* Center app content */
+#root {
+  padding: 20px;
 }
