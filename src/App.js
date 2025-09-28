@@ -8,13 +8,6 @@ import {
 } from "firebase/auth";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
-// Sample Products
-const sampleProducts = [
-  { id: 1, name: "Blue Shoes", price: 20000, img: "https://via.placeholder.com/200/0000FF/FFFFFF?text=Blue+Shoes" },
-  { id: 2, name: "Green Shirt", price: 15000, img: "https://via.placeholder.com/200/008000/FFFFFF?text=Green+Shirt" },
-  { id: 3, name: "Black Bag",  price: 30000, img: "https://via.placeholder.com/200/000000/FFFFFF?text=Black+Bag" },
-];
-
 function App() {
   const [user, setUser] = useState(null);
   const [authMode, setAuthMode] = useState("login"); // login | register
@@ -23,6 +16,9 @@ function App() {
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
 
+  // 🚨 Products will be added by you manually later
+  const [products] = useState([]); 
+
   // Track user login state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u || null));
@@ -30,10 +26,12 @@ function App() {
   }, []);
 
   // Filter products
-  const products = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return q.length ? sampleProducts.filter(p => p.name.toLowerCase().includes(q)) : sampleProducts;
-  }, [search]);
+    return q.length
+      ? products.filter(p => p.name.toLowerCase().includes(q))
+      : products;
+  }, [search, products]);
 
   // Cart helpers
   const addToCart = (p) => {
@@ -105,7 +103,7 @@ WhatsApp: +2347089724573
       <p>Shop easily & pay with bank transfer.</p>
 
       {!user ? (
-        <div style={{ maxWidth: 400, background: "rgba(255,255,255,0.1)", padding: 16, borderRadius: 12 }}>
+        <div style={{ maxWidth: 400, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
             <button onClick={() => setAuthMode("login")}
               style={{ flex: 1, padding: 10, borderRadius: 8, border: "none",
@@ -137,20 +135,24 @@ WhatsApp: +2347089724573
                  style={{ width: "100%", maxWidth: 420, padding: 10, marginBottom: 16, borderRadius: 8, border: "none" }} />
 
           <h3>Products</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
-            {products.map(p => (
-              <div key={p.id} style={{ background: "rgba(255,255,255,0.1)", borderRadius: 12, padding: 12 }}>
-                <img src={p.img} alt={p.name} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 8 }} />
-                <div style={{ marginTop: 8, fontWeight: 600 }}>{p.name}</div>
-                <div>₦{p.price.toLocaleString()}</div>
-                <button onClick={() => addToCart(p)}
-                        style={{ marginTop: 8, width: "100%", padding: 10, borderRadius: 8, border: "none",
-                                 background: "#1f6feb", color: "white" }}>
-                  Add to Cart
-                </button>
-              </div>
-            ))}
-          </div>
+          {!filteredProducts.length ? (
+            <div style={{ opacity: 0.8 }}>⚠️ No products yet. Add some to get started.</div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
+              {filteredProducts.map(p => (
+                <div key={p.id} style={{ background: "rgba(0,0,0,0.6)", borderRadius: 12, padding: 12 }}>
+                  <img src={p.img} alt={p.name} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 8 }} />
+                  <div style={{ marginTop: 8, fontWeight: 600 }}>{p.name}</div>
+                  <div>₦{p.price.toLocaleString()}</div>
+                  <button onClick={() => addToCart(p)}
+                          style={{ marginTop: 8, width: "100%", padding: 10, borderRadius: 8, border: "none",
+                                   background: "#1f6feb", color: "white" }}>
+                    Add to Cart
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           <h3 style={{ marginTop: 24 }}>Cart</h3>
           {!cart.length ? (
@@ -158,7 +160,7 @@ WhatsApp: +2347089724573
           ) : (
             <div style={{ display: "grid", gap: 12, maxWidth: 720 }}>
               {cart.map(item => (
-                <div key={item.id} style={{ display: "grid", gridTemplateColumns: "64px 1fr auto", gap: 12, alignItems: "center", background: "rgba(255,255,255,0.1)", padding: 10, borderRadius: 12 }}>
+                <div key={item.id} style={{ display: "grid", gridTemplateColumns: "64px 1fr auto", gap: 12, alignItems: "center", background: "rgba(0,0,0,0.6)", padding: 10, borderRadius: 12 }}>
                   <img src={item.img} alt={item.name} style={{ width: 64, height: 64, borderRadius: 8, objectFit: "cover" }} />
                   <div>
                     <div style={{ fontWeight: 600 }}>{item.name}</div>
