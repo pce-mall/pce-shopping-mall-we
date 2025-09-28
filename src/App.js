@@ -6,7 +6,15 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  serverTimestamp,
+} from "firebase/firestore";
+
+// 🔑 Owner email (only you will see the dashboard)
+const OWNER_EMAIL = "pceshoppingmall@gmail.com";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -16,35 +24,35 @@ function App() {
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
 
-  // 🛍️ Add your products here
-  const [products] = useState([
-    {
-      id: 1,
-      name: "Blue Shoes",
-      price: 20000,
-      img: "https://firebasestorage.googleapis.com/v0/b/pce-shopping-mall.appspot.com/o/blue-shoes.jpg?alt=media&token=abc123"
-    },
-    {
-      id: 2,
-      name: "Green Shirt",
-      price: 15000,
-      img: "https://firebasestorage.googleapis.com/v0/b/pce-shopping-mall.appspot.com/o/green-shirt.jpg?alt=media&token=xyz456"
-    },
-    {
-      id: 3,
-      name: "Black Bag",
-      price: 30000,
-      img: "https://firebasestorage.googleapis.com/v0/b/pce-shopping-mall.appspot.com/o/black-bag.jpg?alt=media&token=def789"
-    }
-  ]);
+  // Products from Firestore
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Track login
+  // Owner input fields
+  const [newName, setNewName] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+  const [newImg, setNewImg] = useState("");
+
+  // Watch login state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u || null));
     return () => unsub();
   }, []);
 
-  // Filter search
+  // Load products from Firestore
+  const loadProducts = async () => {
+    setLoading(true);
+    const snapshot = await getDocs(collection(db, "products"));
+    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setProducts(items);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  // Filter products by search
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q.length
@@ -52,7 +60,7 @@ function App() {
       : products;
   }, [search, products]);
 
-  // Cart functions
+  // Cart helpers
   const addToCart = (p) => {
     setCart(prev => {
       const found = prev.find(i => i.id === p.id);
@@ -67,14 +75,12 @@ function App() {
 
   // Auth
   const doRegister = async () => {
-    if (!email || !password) return alert("Enter email and password");
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       setEmail(""); setPassword("");
     } catch (e) { alert(e.message); }
   };
   const doLogin = async () => {
-    if (!email || !password) return alert("Enter email and password");
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setEmail(""); setPassword("");
@@ -82,7 +88,7 @@ function App() {
   };
   const doLogout = async () => { await signOut(auth); };
 
-  // Checkout (Bank Transfer)
+  // Checkout with bank transfer
   const checkout = async () => {
     if (!user) return alert("Please login first");
     if (!cart.length) return alert("Your cart is empty");
@@ -110,6 +116,20 @@ WhatsApp: +2347089724573
     setCart([]);
   };
 
+  // Owner adds product
+  const addProduct = async () => {
+    if (!newName || !newPrice || !newImg) return alert("Fill all fields");
+    await addDoc(collection(db, "products"), {
+      name: newName,
+      price: Number(newPrice),
+      img: newImg,
+      createdAt: serverTimestamp(),
+    });
+    setNewName(""); setNewPrice(""); setNewImg("");
+    loadProducts();
+    alert("✅ Product added!");
+  };
+
   return (
     <div style={{
       background: "linear-gradient(90deg, blue, green, black)",
@@ -122,6 +142,7 @@ WhatsApp: +2347089724573
       <p>Shop easily & pay with bank transfer.</p>
 
       {!user ? (
+        // Login/Register Box
         <div style={{ maxWidth: 400, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
             <button onClick={() => setAuthMode("login")}
@@ -145,17 +166,38 @@ WhatsApp: +2347089724573
         </div>
       ) : (
         <>
+          {/* Top bar */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div>Welcome <strong>{user.email}</strong></div>
             <button onClick={doLogout} style={{ padding: "8px 12px", borderRadius: 8, border: "none" }}>Logout</button>
           </div>
 
+          {/* If owner, show dashboard */}
+          {user.email === OWNER_EMAIL && (
+            <div style={{ marginBottom: 24, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
+              <h3>📦 Owner Dashboard - Add Product</h3>
+              <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Product Name"
+                     style={{ width: "100%", padding: 8, marginBottom: 8 }} />
+              <input value={newPrice} onChange={e=>setNewPrice(e.target.value)} placeholder="Price (₦)" type="number"
+                     style={{ width: "100%", padding: 8, marginBottom: 8 }} />
+              <input value={newImg} onChange={e=>setNewImg(e.target.value)} placeholder="Image URL"
+                     style={{ width: "100%", padding: 8, marginBottom: 8 }} />
+              <button onClick={addProduct} style={{ width: "100%", padding: 10, borderRadius: 8, border: "none", background: "#22c55e", color: "white" }}>
+                Add Product
+              </button>
+            </div>
+          )}
+
+          {/* Search bar */}
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…"
                  style={{ width: "100%", maxWidth: 420, padding: 10, marginBottom: 16, borderRadius: 8, border: "none" }} />
 
+          {/* Products */}
           <h3>Products</h3>
-          {!filteredProducts.length ? (
-            <div style={{ opacity: 0.8 }}>⚠️ No products yet. Add some to get started.</div>
+          {loading ? (
+            <div>Loading products...</div>
+          ) : !filteredProducts.length ? (
+            <div>No products found.</div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
               {filteredProducts.map(p => (
@@ -164,8 +206,7 @@ WhatsApp: +2347089724573
                   <div style={{ marginTop: 8, fontWeight: 600 }}>{p.name}</div>
                   <div>₦{p.price.toLocaleString()}</div>
                   <button onClick={() => addToCart(p)}
-                          style={{ marginTop: 8, width: "100%", padding: 10, borderRadius: 8, border: "none",
-                                   background: "#1f6feb", color: "white" }}>
+                          style={{ marginTop: 8, width: "100%", padding: 10, borderRadius: 8, border: "none", background: "#1f6feb", color: "white" }}>
                     Add to Cart
                   </button>
                 </div>
@@ -173,6 +214,7 @@ WhatsApp: +2347089724573
             </div>
           )}
 
+          {/* Cart */}
           <h3 style={{ marginTop: 24 }}>Cart</h3>
           {!cart.length ? (
             <div>Your cart is empty.</div>
