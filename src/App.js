@@ -385,7 +385,7 @@ WhatsApp: +2347089724573
                   {myOrders.map(order => (
                     <div key={order.id} style={{ background: "rgba(255,255,255,0.2)", padding: 12, borderRadius: 8 }}>
                       <div><strong>Order ID:</strong> {order.id}</div>
-                      <div><strong>Date:</strong> {order.createdAt?.toDate?.().toLocaleString()}</div>
+                      <div><strong>Date:</strong> {order.createdAt?.toDate?.().toLocaleString?.() || "N/A"}</div>
                       <div><strong>Total:</strong> ₦{order.total.toLocaleString()}</div>
                       <div><strong>Status:</strong> {order.paid ? "✅ Paid" : "❌ Not Paid"}</div>
                       <h4>Items:</h4>
