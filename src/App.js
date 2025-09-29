@@ -11,10 +11,12 @@ import {
   addDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   doc,
   serverTimestamp,
   query,
   orderBy,
+  where,
 } from "firebase/firestore";
 
 // 🔑 Owner email
@@ -35,9 +37,19 @@ function App() {
   const [newPrice, setNewPrice] = useState("");
   const [newImg, setNewImg] = useState("");
 
-  // Orders (for owner)
+  // Edit product state
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editImg, setEditImg] = useState("");
+
+  // Orders
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+
+  // Receipts (for customer)
+  const [myOrders, setMyOrders] = useState([]);
+  const [loadingMyOrders, setLoadingMyOrders] = useState(true);
 
   // Track login
   useEffect(() => {
@@ -45,7 +57,7 @@ function App() {
     return () => unsub();
   }, []);
 
-  // Load products from Firestore
+  // Load products
   const loadProducts = async () => {
     setLoading(true);
     const snapshot = await getDocs(collection(db, "products"));
@@ -54,7 +66,7 @@ function App() {
     setLoading(false);
   };
 
-  // Load orders (only for owner)
+  // Load all orders (Owner only)
   const loadOrders = async () => {
     setLoadingOrders(true);
     const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
@@ -64,14 +76,27 @@ function App() {
     setLoadingOrders(false);
   };
 
+  // Load my orders (Customer receipts)
+  const loadMyOrders = async (userEmail) => {
+    setLoadingMyOrders(true);
+    const q = query(
+      collection(db, "orders"),
+      where("user", "==", userEmail),
+      orderBy("createdAt", "desc")
+    );
+    const snapshot = await getDocs(q);
+    const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setMyOrders(list);
+    setLoadingMyOrders(false);
+  };
+
   useEffect(() => {
     loadProducts();
-    if (user?.email === OWNER_EMAIL) {
-      loadOrders();
-    }
+    if (user?.email === OWNER_EMAIL) loadOrders();
+    if (user && user.email !== OWNER_EMAIL) loadMyOrders(user.email);
   }, [user]);
 
-  // Filter products by search
+  // Search filter
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q.length
@@ -133,9 +158,10 @@ WhatsApp: +2347089724573
     });
 
     setCart([]);
+    loadMyOrders(user.email); // Refresh receipts
   };
 
-  // Add product (Owner only)
+  // Add product
   const addProduct = async () => {
     if (!newName || !newPrice || !newImg) return alert("Fill all fields");
     await addDoc(collection(db, "products"), {
@@ -149,6 +175,47 @@ WhatsApp: +2347089724573
     alert("✅ Product added!");
   };
 
+  // Delete product
+  const deleteProduct = async (productId) => {
+    if (!window.confirm("⚠️ Delete this product?")) return;
+    try {
+      const productRef = doc(db, "products", productId);
+      await deleteDoc(productRef);
+      alert("🗑️ Product deleted!");
+      loadProducts();
+    } catch (e) {
+      alert("❌ Failed to delete product: " + e.message);
+    }
+  };
+
+  // Edit product
+  const startEdit = (p) => {
+    setEditingProduct(p.id);
+    setEditName(p.name);
+    setEditPrice(p.price);
+    setEditImg(p.img);
+  };
+  const saveEdit = async () => {
+    if (!editName || !editPrice || !editImg) return alert("Fill all fields");
+    try {
+      const productRef = doc(db, "products", editingProduct);
+      await updateDoc(productRef, {
+        name: editName,
+        price: Number(editPrice),
+        img: editImg,
+      });
+      alert("✏️ Product updated!");
+      setEditingProduct(null);
+      loadProducts();
+    } catch (e) {
+      alert("❌ Failed to update product: " + e.message);
+    }
+  };
+  const cancelEdit = () => {
+    setEditingProduct(null);
+    setEditName(""); setEditPrice(""); setEditImg("");
+  };
+
   // Mark order as paid
   const markAsPaid = async (orderId) => {
     try {
@@ -157,7 +224,20 @@ WhatsApp: +2347089724573
       alert("✅ Order marked as Paid!");
       loadOrders();
     } catch (e) {
-      alert("❌ Failed to update order: " + e.message);
+      alert("❌ Failed: " + e.message);
+    }
+  };
+
+  // Delete order
+  const deleteOrder = async (orderId) => {
+    if (!window.confirm("⚠️ Delete this order?")) return;
+    try {
+      const orderRef = doc(db, "orders", orderId);
+      await deleteDoc(orderRef);
+      alert("🗑️ Order deleted!");
+      loadOrders();
+    } catch (e) {
+      alert("❌ Failed to delete order: " + e.message);
     }
   };
 
@@ -169,8 +249,11 @@ WhatsApp: +2347089724573
       padding: 20,
       fontFamily: "Arial, sans-serif"
     }}>
-      <h1>PCE Shopping Mall</h1>
-      <p>Shop easily & pay with bank transfer.</p>
+      {/* Mall Heading */}
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <h1 style={{ fontSize: "2.5rem", margin: 0, color: "yellow" }}>🛍️ PCE Shopping Mall 🛍️</h1>
+        <p style={{ fontSize: "1.2rem", margin: 0 }}>The easiest way to shop and pay by transfer</p>
+      </div>
 
       {!user ? (
         // Login/Register
@@ -207,7 +290,7 @@ WhatsApp: +2347089724573
           </div>
 
           {/* Owner Dashboard */}
-          {user.email === OWNER_EMAIL && (
+          {user.email === OWNER_EMAIL ? (
             <div style={{ marginBottom: 24, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
               <h3>📦 Owner Dashboard</h3>
 
@@ -223,99 +306,87 @@ WhatsApp: +2347089724573
                 Add Product
               </button>
 
+              {/* Manage products */}
+              <h4 style={{ marginTop: 20 }}>🛍️ Manage Products</h4>
+              {products.map(p => (
+                <div key={p.id} style={{ background: "rgba(255,255,255,0.1)", padding: 12, borderRadius: 8 }}>
+                  {editingProduct === p.id ? (
+                    <>
+                      <input value={editName} onChange={e=>setEditName(e.target.value)} placeholder="Name"
+                             style={{ width: "100%", padding: 6, marginBottom: 6 }} />
+                      <input value={editPrice} onChange={e=>setEditPrice(e.target.value)} placeholder="Price"
+                             type="number" style={{ width: "100%", padding: 6, marginBottom: 6 }} />
+                      <input value={editImg} onChange={e=>setEditImg(e.target.value)} placeholder="Image URL"
+                             style={{ width: "100%", padding: 6, marginBottom: 6 }} />
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={saveEdit} style={{ flex: 1, padding: 8, borderRadius: 6, border: "none", background: "#16a34a", color: "white" }}>
+                          Save
+                        </button>
+                        <button onClick={cancelEdit} style={{ flex: 1, padding: 8, borderRadius: 6, border: "none", background: "#6b7280", color: "white" }}>
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div><strong>{p.name}</strong> - ₦{p.price.toLocaleString()}</div>
+                      <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                        <button onClick={() => startEdit(p)}
+                                style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#0ea5e9", color: "white" }}>
+                          Edit
+                        </button>
+                        <button onClick={() => deleteProduct(p.id)}
+                                style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#dc2626", color: "white" }}>
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+
               {/* Orders list */}
               <h4 style={{ marginTop: 20 }}>📑 Orders</h4>
-              {loadingOrders ? (
-                <div>Loading orders...</div>
-              ) : !orders.length ? (
-                <div>No orders yet.</div>
+              {orders.map(order => (
+                <div key={order.id} style={{ background: "rgba(255,255,255,0.1)", padding: 12, borderRadius: 8 }}>
+                  <div><strong>Customer:</strong> {order.user}</div>
+                  <div><strong>Total:</strong> ₦{order.total.toLocaleString()}</div>
+                  <div><strong>Status:</strong> {order.paid ? "✅ Paid" : "❌ Not Paid"}</div>
+                  <ul>
+                    {order.cart.map((item, idx) => (
+                      <li key={idx}>{item.qty} × {item.name} (₦{item.price.toLocaleString()})</li>
+                    ))}
+                  </ul>
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    {!order.paid && (
+                      <button onClick={() => markAsPaid(order.id)}
+                              style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#16a34a", color: "white" }}>
+                        Mark as Paid
+                      </button>
+                    )}
+                    <button onClick={() => deleteOrder(order.id)}
+                            style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#dc2626", color: "white" }}>
+                      Delete Order
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Receipts for customers */}
+              <h3>🧾 My Receipts</h3>
+              {loadingMyOrders ? (
+                <div>Loading your receipts...</div>
+              ) : !myOrders.length ? (
+                <div>You haven’t placed any orders yet.</div>
               ) : (
-                <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
-                  {orders.map(order => (
-                    <div key={order.id} style={{ background: "rgba(255,255,255,0.1)", padding: 12, borderRadius: 8 }}>
-                      <div><strong>Customer:</strong> {order.user}</div>
+                <div style={{ display: "grid", gap: 12 }}>
+                  {myOrders.map(order => (
+                    <div key={order.id} style={{ background: "rgba(255,255,255,0.2)", padding: 12, borderRadius: 8 }}>
+                      <div><strong>Order ID:</strong> {order.id}</div>
+                      <div><strong>Date:</strong> {order.createdAt?.toDate?.().toLocaleString()}</div>
                       <div><strong>Total:</strong> ₦{order.total.toLocaleString()}</div>
                       <div><strong>Status:</strong> {order.paid ? "✅ Paid" : "❌ Not Paid"}</div>
-                      <div><strong>Items:</strong></div>
-                      <ul>
-                        {order.cart.map((item, idx) => (
-                          <li key={idx}>{item.qty} × {item.name} (₦{item.price.toLocaleString()})</li>
-                        ))}
-                      </ul>
-                      {!order.paid && (
-                        <button onClick={() => markAsPaid(order.id)}
-                                style={{ marginTop: 8, padding: "6px 12px", borderRadius: 6, border: "none", background: "#16a34a", color: "white" }}>
-                          Mark as Paid
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Search bar */}
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search products…"
-                 style={{ width: "100%", maxWidth: 420, padding: 10, marginBottom: 16, borderRadius: 8, border: "none" }} />
-
-          {/* Products */}
-          <h3>Products</h3>
-          {loading ? (
-            <div>Loading products...</div>
-          ) : !filteredProducts.length ? (
-            <div>No products found.</div>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
-              {filteredProducts.map(p => (
-                <div key={p.id} style={{ background: "rgba(0,0,0,0.6)", borderRadius: 12, padding: 12 }}>
-                  <img src={p.img} alt={p.name} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 8 }} />
-                  <div style={{ marginTop: 8, fontWeight: 600 }}>{p.name}</div>
-                  <div>₦{p.price.toLocaleString()}</div>
-                  <button onClick={() => addToCart(p)}
-                          style={{ marginTop: 8, width: "100%", padding: 10, borderRadius: 8, border: "none",
-                                   background: "#1f6feb", color: "white" }}>
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Cart */}
-          <h3 style={{ marginTop: 24 }}>Cart</h3>
-          {!cart.length ? (
-            <div>Your cart is empty.</div>
-          ) : (
-            <div style={{ display: "grid", gap: 12, maxWidth: 720 }}>
-              {cart.map(item => (
-                <div key={item.id} style={{ display: "grid", gridTemplateColumns: "64px 1fr auto", gap: 12, alignItems: "center", background: "rgba(0,0,0,0.6)", padding: 10, borderRadius: 12 }}>
-                  <img src={item.img} alt={item.name} style={{ width: 64, height: 64, borderRadius: 8, objectFit: "cover" }} />
-                  <div>
-                    <div style={{ fontWeight: 600 }}>{item.name}</div>
-                    <div>₦{(item.price * item.qty).toLocaleString()} ({item.qty} × ₦{item.price.toLocaleString()})</div>
-                    <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-                      <button onClick={() => decQty(item.id)}>-</button>
-                      <button onClick={() => incQty(item.id)}>+</button>
-                    </div>
-                  </div>
-                  <button onClick={() => removeFromCart(item.id)} style={{ padding: "8px 12px", borderRadius: 8, border: "none" }}>
-                    Delete
-                  </button>
-                </div>
-              ))}
-              <div style={{ textAlign: "right", fontSize: 18, fontWeight: 700 }}>
-                Total: ₦{total.toLocaleString()}
-              </div>
-              <button onClick={checkout} style={{ padding: 12, borderRadius: 10, border: "none", background: "#22c55e", color: "white", fontSize: 16 }}>
-                Checkout (Bank Transfer)
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-export default App;
+                      <h4>Items:</h4>
+                      <ul
