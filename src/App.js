@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+ import React, { useEffect, useMemo, useState } from "react";
 import { auth, db } from "./firebase";
 import {
   createUserWithEmailAndPassword,
@@ -604,3 +604,4 @@ WhatsApp: +2347089724573
                           border: "none",
                           background: "#16a34a",
                           color: "white",
+                        }}
