@@ -10,6 +10,8 @@ import {
   collection,
   addDoc,
   getDocs,
+  updateDoc,
+  doc,
   serverTimestamp,
   query,
   orderBy,
@@ -147,6 +149,18 @@ WhatsApp: +2347089724573
     alert("✅ Product added!");
   };
 
+  // Mark order as paid
+  const markAsPaid = async (orderId) => {
+    try {
+      const orderRef = doc(db, "orders", orderId);
+      await updateDoc(orderRef, { paid: true });
+      alert("✅ Order marked as Paid!");
+      loadOrders();
+    } catch (e) {
+      alert("❌ Failed to update order: " + e.message);
+    }
+  };
+
   return (
     <div style={{
       background: "linear-gradient(90deg, blue, green, black)",
@@ -228,6 +242,12 @@ WhatsApp: +2347089724573
                           <li key={idx}>{item.qty} × {item.name} (₦{item.price.toLocaleString()})</li>
                         ))}
                       </ul>
+                      {!order.paid && (
+                        <button onClick={() => markAsPaid(order.id)}
+                                style={{ marginTop: 8, padding: "6px 12px", borderRadius: 6, border: "none", background: "#16a34a", color: "white" }}>
+                          Mark as Paid
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
