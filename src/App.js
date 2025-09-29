@@ -61,7 +61,7 @@ function App() {
   const loadProducts = async () => {
     setLoading(true);
     const snapshot = await getDocs(collection(db, "products"));
-    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     setProducts(items);
     setLoading(false);
   };
@@ -71,7 +71,7 @@ function App() {
     setLoadingOrders(true);
     const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
-    const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     setOrders(list);
     setLoadingOrders(false);
   };
@@ -85,7 +85,7 @@ function App() {
       orderBy("createdAt", "desc")
     );
     const snapshot = await getDocs(q);
-    const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     setMyOrders(list);
     setLoadingMyOrders(false);
   };
@@ -100,37 +100,57 @@ function App() {
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q.length
-      ? products.filter(p => p.name.toLowerCase().includes(q))
+      ? products.filter((p) => p.name.toLowerCase().includes(q))
       : products;
   }, [search, products]);
 
   // Cart functions
   const addToCart = (p) => {
-    setCart(prev => {
-      const found = prev.find(i => i.id === p.id);
-      if (found) return prev.map(i => i.id === p.id ? { ...i, qty: i.qty + 1 } : i);
+    setCart((prev) => {
+      const found = prev.find((i) => i.id === p.id);
+      if (found)
+        return prev.map((i) =>
+          i.id === p.id ? { ...i, qty: i.qty + 1 } : i
+        );
       return [...prev, { ...p, qty: 1 }];
     });
   };
-  const removeFromCart = (id) => setCart(prev => prev.filter(i => i.id !== id));
-  const incQty = (id) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + 1 } : i));
-  const decQty = (id) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i));
+  const removeFromCart = (id) =>
+    setCart((prev) => prev.filter((i) => i.id !== id));
+  const incQty = (id) =>
+    setCart((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, qty: i.qty + 1 } : i))
+    );
+  const decQty = (id) =>
+    setCart((prev) =>
+      prev.map((i) =>
+        i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i
+      )
+    );
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
   // Auth
   const doRegister = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      setEmail(""); setPassword("");
-    } catch (e) { alert(e.message); }
+      setEmail("");
+      setPassword("");
+    } catch (e) {
+      alert(e.message);
+    }
   };
   const doLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      setEmail(""); setPassword("");
-    } catch (e) { alert(e.message); }
+      setEmail("");
+      setPassword("");
+    } catch (e) {
+      alert(e.message);
+    }
   };
-  const doLogout = async () => { await signOut(auth); };
+  const doLogout = async () => {
+    await signOut(auth);
+  };
 
   // Checkout
   const checkout = async () => {
@@ -170,7 +190,9 @@ WhatsApp: +2347089724573
       img: newImg,
       createdAt: serverTimestamp(),
     });
-    setNewName(""); setNewPrice(""); setNewImg("");
+    setNewName("");
+    setNewPrice("");
+    setNewImg("");
     loadProducts();
     alert("✅ Product added!");
   };
@@ -213,7 +235,9 @@ WhatsApp: +2347089724573
   };
   const cancelEdit = () => {
     setEditingProduct(null);
-    setEditName(""); setEditPrice(""); setEditImg("");
+    setEditName("");
+    setEditPrice("");
+    setEditImg("");
   };
 
   // Mark order as paid
@@ -242,101 +266,295 @@ WhatsApp: +2347089724573
   };
 
   return (
-    <div style={{
-      background: "linear-gradient(90deg, blue, green, black)",
-      minHeight: "100vh",
-      color: "white",
-      padding: 20,
-      fontFamily: "Arial, sans-serif"
-    }}>
+    <div
+      style={{
+        background: "linear-gradient(90deg, blue, green, black)",
+        minHeight: "100vh",
+        color: "white",
+        padding: 20,
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
       {/* Mall Heading */}
       <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <h1 style={{ fontSize: "2.5rem", margin: 0, color: "yellow" }}>🛍️ PCE Shopping Mall 🛍️</h1>
-        <p style={{ fontSize: "1.2rem", margin: 0 }}>The easiest way to shop and pay by transfer</p>
+        <h1 style={{ fontSize: "2.5rem", margin: 0, color: "yellow" }}>
+          🛍️ PCE Shopping Mall 🛍️
+        </h1>
+        <p style={{ fontSize: "1.2rem", margin: 0 }}>
+          The easiest way to shop and pay by transfer
+        </p>
       </div>
 
       {!user ? (
         // Login/Register
-        <div style={{ maxWidth: 400, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
+        <div
+          style={{
+            maxWidth: 400,
+            background: "rgba(0,0,0,0.6)",
+            padding: 16,
+            borderRadius: 12,
+          }}
+        >
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <button onClick={() => setAuthMode("login")}
-              style={{ flex: 1, padding: 10, borderRadius: 8, border: "none",
-                       background: authMode==="login" ? "#1f6feb" : "rgba(255,255,255,0.2)", color: "white" }}>
+            <button
+              onClick={() => setAuthMode("login")}
+              style={{
+                flex: 1,
+                padding: 10,
+                borderRadius: 8,
+                border: "none",
+                background:
+                  authMode === "login"
+                    ? "#1f6feb"
+                    : "rgba(255,255,255,0.2)",
+                color: "white",
+              }}
+            >
               Login
             </button>
-            <button onClick={() => setAuthMode("register")}
-              style={{ flex: 1, padding: 10, borderRadius: 8, border: "none",
-                       background: authMode==="register" ? "#1f6feb" : "rgba(255,255,255,0.2)", color: "white" }}>
+            <button
+              onClick={() => setAuthMode("register")}
+              style={{
+                flex: 1,
+                padding: 10,
+                borderRadius: 8,
+                border: "none",
+                background:
+                  authMode === "register"
+                    ? "#1f6feb"
+                    : "rgba(255,255,255,0.2)",
+                color: "white",
+              }}
+            >
               Register
             </button>
           </div>
-          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" type="email"
-                 style={{ width: "100%", padding: 10, marginBottom: 8, borderRadius: 8, border: "none" }} />
-          <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type="password"
-                 style={{ width: "100%", padding: 10, marginBottom: 12, borderRadius: 8, border: "none" }} />
-          {authMode === "login"
-            ? <button onClick={doLogin} style={{ width: "100%", padding: 12, borderRadius: 8, border: "none", background: "#0ea5e9", color: "white" }}>Login</button>
-            : <button onClick={doRegister} style={{ width: "100%", padding: 12, borderRadius: 8, border: "none", background: "#22c55e", color: "white" }}>Create Account</button>}
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+            style={{
+              width: "100%",
+              padding: 10,
+              marginBottom: 8,
+              borderRadius: 8,
+              border: "none",
+            }}
+          />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            type="password"
+            style={{
+              width: "100%",
+              padding: 10,
+              marginBottom: 12,
+              borderRadius: 8,
+              border: "none",
+            }}
+          />
+          {authMode === "login" ? (
+            <button
+              onClick={doLogin}
+              style={{
+                width: "100%",
+                padding: 12,
+                borderRadius: 8,
+                border: "none",
+                background: "#0ea5e9",
+                color: "white",
+              }}
+            >
+              Login
+            </button>
+          ) : (
+            <button
+              onClick={doRegister}
+              style={{
+                width: "100%",
+                padding: 12,
+                borderRadius: 8,
+                border: "none",
+                background: "#22c55e",
+                color: "white",
+              }}
+            >
+              Create Account
+            </button>
+          )}
         </div>
       ) : (
         <>
           {/* Top bar */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
             <div>
               Welcome <strong>{user.email}</strong>
-              {user.email === OWNER_EMAIL && <span style={{ marginLeft: 10, color: "yellow" }}>🔑 Owner Mode</span>}
+              {user.email === OWNER_EMAIL && (
+                <span style={{ marginLeft: 10, color: "yellow" }}>
+                  🔑 Owner Mode
+                </span>
+              )}
             </div>
-            <button onClick={doLogout} style={{ padding: "8px 12px", borderRadius: 8, border: "none" }}>Logout</button>
+            <button
+              onClick={doLogout}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "none",
+              }}
+            >
+              Logout
+            </button>
           </div>
 
           {/* Owner Dashboard */}
           {user.email === OWNER_EMAIL ? (
-            <div style={{ marginBottom: 24, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
+            <div
+              style={{
+                marginBottom: 24,
+                background: "rgba(0,0,0,0.6)",
+                padding: 16,
+                borderRadius: 12,
+              }}
+            >
               <h3>📦 Owner Dashboard</h3>
 
               {/* Add product */}
               <h4>Add Product</h4>
-              <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Product Name"
-                     style={{ width: "100%", padding: 8, marginBottom: 8 }} />
-              <input value={newPrice} onChange={e=>setNewPrice(e.target.value)} placeholder="Price (₦)" type="number"
-                     style={{ width: "100%", padding: 8, marginBottom: 8 }} />
-              <input value={newImg} onChange={e=>setNewImg(e.target.value)} placeholder="Image URL"
-                     style={{ width: "100%", padding: 8, marginBottom: 8 }} />
-              <button onClick={addProduct} style={{ width: "100%", padding: 10, borderRadius: 8, border: "none", background: "#22c55e", color: "white" }}>
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Product Name"
+                style={{ width: "100%", padding: 8, marginBottom: 8 }}
+              />
+              <input
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                placeholder="Price (₦)"
+                type="number"
+                style={{ width: "100%", padding: 8, marginBottom: 8 }}
+              />
+              <input
+                value={newImg}
+                onChange={(e) => setNewImg(e.target.value)}
+                placeholder="Image URL"
+                style={{ width: "100%", padding: 8, marginBottom: 8 }}
+              />
+              <button
+                onClick={addProduct}
+                style={{
+                  width: "100%",
+                  padding: 10,
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#22c55e",
+                  color: "white",
+                }}
+              >
                 Add Product
               </button>
 
               {/* Manage products */}
               <h4 style={{ marginTop: 20 }}>🛍️ Manage Products</h4>
-              {products.map(p => (
-                <div key={p.id} style={{ background: "rgba(255,255,255,0.1)", padding: 12, borderRadius: 8 }}>
+              {products.map((p) => (
+                <div
+                  key={p.id}
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
+                >
                   {editingProduct === p.id ? (
                     <>
-                      <input value={editName} onChange={e=>setEditName(e.target.value)} placeholder="Name"
-                             style={{ width: "100%", padding: 6, marginBottom: 6 }} />
-                      <input value={editPrice} onChange={e=>setEditPrice(e.target.value)} placeholder="Price"
-                             type="number" style={{ width: "100%", padding: 6, marginBottom: 6 }} />
-                      <input value={editImg} onChange={e=>setEditImg(e.target.value)} placeholder="Image URL"
-                             style={{ width: "100%", padding: 6, marginBottom: 6 }} />
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        placeholder="Name"
+                        style={{ width: "100%", padding: 6, marginBottom: 6 }}
+                      />
+                      <input
+                        value={editPrice}
+                        onChange={(e) => setEditPrice(e.target.value)}
+                        placeholder="Price"
+                        type="number"
+                        style={{ width: "100%", padding: 6, marginBottom: 6 }}
+                      />
+                      <input
+                        value={editImg}
+                        onChange={(e) => setEditImg(e.target.value)}
+                        placeholder="Image URL"
+                        style={{ width: "100%", padding: 6, marginBottom: 6 }}
+                      />
                       <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={saveEdit} style={{ flex: 1, padding: 8, borderRadius: 6, border: "none", background: "#16a34a", color: "white" }}>
+                        <button
+                          onClick={saveEdit}
+                          style={{
+                            flex: 1,
+                            padding: 8,
+                            borderRadius: 6,
+                            border: "none",
+                            background: "#16a34a",
+                            color: "white",
+                          }}
+                        >
                           Save
                         </button>
-                        <button onClick={cancelEdit} style={{ flex: 1, padding: 8, borderRadius: 6, border: "none", background: "#6b7280", color: "white" }}>
+                        <button
+                          onClick={cancelEdit}
+                          style={{
+                            flex: 1,
+                            padding: 8,
+                            borderRadius: 6,
+                            border: "none",
+                            background: "#6b7280",
+                            color: "white",
+                          }}
+                        >
                           Cancel
                         </button>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div><strong>{p.name}</strong> - ₦{p.price.toLocaleString()}</div>
+                      <div>
+                        <strong>{p.name}</strong> - ₦
+                        {p.price.toLocaleString()}
+                      </div>
                       <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-                        <button onClick={() => startEdit(p)}
-                                style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#0ea5e9", color: "white" }}>
+                        <button
+                          onClick={() => startEdit(p)}
+                          style={{
+                            flex: 1,
+                            padding: 6,
+                            borderRadius: 6,
+                            border: "none",
+                            background: "#0ea5e9",
+                            color: "white",
+                          }}
+                        >
                           Edit
                         </button>
-                        <button onClick={() => deleteProduct(p.id)}
-                                style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#dc2626", color: "white" }}>
+                        <button
+                          onClick={() => deleteProduct(p.id)}
+                          style={{
+                            flex: 1,
+                            padding: 6,
+                            borderRadius: 6,
+                            border: "none",
+                            background: "#dc2626",
+                            color: "white",
+                          }}
+                        >
                           Delete
                         </button>
                       </div>
@@ -347,46 +565,42 @@ WhatsApp: +2347089724573
 
               {/* Orders list */}
               <h4 style={{ marginTop: 20 }}>📑 Orders</h4>
-              {orders.map(order => (
-                <div key={order.id} style={{ background: "rgba(255,255,255,0.1)", padding: 12, borderRadius: 8 }}>
-                  <div><strong>Customer:</strong> {order.user}</div>
-                  <div><strong>Total:</strong> ₦{order.total.toLocaleString()}</div>
-                  <div><strong>Status:</strong> {order.paid ? "✅ Paid" : "❌ Not Paid"}</div>
+              {orders.map((order) => (
+                <div
+                  key={order.id}
+                  style={{
+                    background: "rgba(255,255,255,0.1)",
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
+                >
+                  <div>
+                    <strong>Customer:</strong> {order.user}
+                  </div>
+                  <div>
+                    <strong>Total:</strong> ₦
+                    {order.total.toLocaleString()}
+                  </div>
+                  <div>
+                    <strong>Status:</strong>{" "}
+                    {order.paid ? "✅ Paid" : "❌ Not Paid"}
+                  </div>
                   <ul>
                     {order.cart.map((item, idx) => (
-                      <li key={idx}>{item.qty} × {item.name} (₦{item.price.toLocaleString()})</li>
+                      <li key={idx}>
+                        {item.qty} × {item.name} (₦
+                        {item.price.toLocaleString()})
+                      </li>
                     ))}
                   </ul>
                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                     {!order.paid && (
-                      <button onClick={() => markAsPaid(order.id)}
-                              style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#16a34a", color: "white" }}>
-                        Mark as Paid
-                      </button>
-                    )}
-                    <button onClick={() => deleteOrder(order.id)}
-                            style={{ flex: 1, padding: 6, borderRadius: 6, border: "none", background: "#dc2626", color: "white" }}>
-                      Delete Order
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <>
-              {/* Receipts for customers */}
-              <h3>🧾 My Receipts</h3>
-              {loadingMyOrders ? (
-                <div>Loading your receipts...</div>
-              ) : !myOrders.length ? (
-                <div>You haven’t placed any orders yet.</div>
-              ) : (
-                <div style={{ display: "grid", gap: 12 }}>
-                  {myOrders.map(order => (
-                    <div key={order.id} style={{ background: "rgba(255,255,255,0.2)", padding: 12, borderRadius: 8 }}>
-                      <div><strong>Order ID:</strong> {order.id}</div>
-                      <div><strong>Date:</strong> {order.createdAt?.toDate?.().toLocaleString?.() || "N/A"}</div>
-                      <div><strong>Total:</strong> ₦{order.total.toLocaleString()}</div>
-                      <div><strong>Status:</strong> {order.paid ? "✅ Paid" : "❌ Not Paid"}</div>
-                      <h4>Items:</h4>
-                      <ul
+                      <button
+                        onClick={() => markAsPaid(order.id)}
+                        style={{
+                          flex: 1,
+                          padding: 6,
+                          borderRadius: 6,
+                          border: "none",
+                          background: "#16a34a",
+                          color: "white",
