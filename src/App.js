@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+// src/App.js
+import React, { useState, useEffect, useMemo } from "react";
 import { auth, db } from "./firebase";
 import {
   createUserWithEmailAndPassword,
@@ -26,20 +27,19 @@ function App() {
   const [authMode, setAuthMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [search, setSearch] = useState("");
   const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
-
-  // Product form (owner)
-  const [newName, setNewName] = useState("");
-  const [newPrice, setNewPrice] = useState("");
-  const [newImg, setNewImg] = useState("");
-  const [editing, setEditing] = useState(null);
-
-  // Orders
   const [orders, setOrders] = useState([]);
   const [myOrders, setMyOrders] = useState([]);
 
+  // Product form (owner)
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [img, setImg] = useState("");
+  const [editing, setEditing] = useState(null);
+
+  // Auth state
   useEffect(() => onAuthStateChanged(auth, (u) => setUser(u)), []);
 
   // Load products
@@ -48,14 +48,13 @@ function App() {
     setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
 
-  // Load all orders (owner)
+  // Load orders
   const loadOrders = async () => {
     const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
     setOrders(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
 
-  // Load my orders (customer)
   const loadMyOrders = async (email) => {
     const q = query(
       collection(db, "orders"),
@@ -104,15 +103,16 @@ function App() {
   const checkout = async () => {
     if (!user) return alert("Please login first");
     if (!cart.length) return alert("Cart is empty");
-    alert(`Please pay ₦${total.toLocaleString()} via transfer:
+    alert(`Please transfer ₦${total} to:
 
-Bank: First City Monument Bank (FCMB)
-Account Name: Paul Chuk Enterprise
-Account Number: 2005586667
+Bank: FCMB
+Account: Paul Chuk Enterprise
+Number: 2005586667
 
 Send receipt to:
 Email: pceshoppingmall@gmail.com
 WhatsApp: +2347089724573`);
+
     await addDoc(collection(db, "orders"), {
       user: user.email,
       cart,
@@ -126,28 +126,29 @@ WhatsApp: +2347089724573`);
 
   // Products (owner)
   const addProduct = async () => {
-    if (!newName || !newPrice || !newImg) return;
+    if (!name || !price || !img) return;
     await addDoc(collection(db, "products"), {
-      name: newName,
-      price: Number(newPrice),
-      img: newImg,
+      name,
+      price: Number(price),
+      img,
     });
-    setNewName("");
-    setNewPrice("");
-    setNewImg("");
+    setName("");
+    setPrice("");
+    setImg("");
     loadProducts();
   };
+
   const updateProduct = async (id) => {
     await updateDoc(doc(db, "products", id), {
-      name: newName,
-      price: Number(newPrice),
-      img: newImg,
+      name,
+      price: Number(price),
+      img,
     });
     setEditing(null);
     loadProducts();
   };
+
   const deleteProduct = async (id) => {
-    if (!window.confirm("Delete product?")) return;
     await deleteDoc(doc(db, "products", id));
     loadProducts();
   };
@@ -158,17 +159,13 @@ WhatsApp: +2347089724573`);
     loadOrders();
   };
   const deleteOrder = async (id) => {
-    if (!window.confirm("Delete order?")) return;
     await deleteDoc(doc(db, "orders", id));
     loadOrders();
   };
 
-  // Filtered products
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return q
-      ? products.filter((p) => p.name.toLowerCase().includes(q))
-      : products;
+    return q ? products.filter((p) => p.name.toLowerCase().includes(q)) : products;
   }, [search, products]);
 
   return (
@@ -176,16 +173,14 @@ WhatsApp: +2347089724573`);
       style={{
         background: "linear-gradient(90deg, blue, green, black)",
         minHeight: "100vh",
-        color: "white",
         padding: 20,
       }}
     >
-      <h1 style={{ textAlign: "center", color: "yellow" }}>🛍 PCE Shopping Mall</h1>
+      <h1 style={{ textAlign: "center" }}>🛍 PCE Shopping Mall</h1>
 
       {!user ? (
-        // Auth form
         <div style={{ maxWidth: 400, margin: "0 auto" }}>
-          <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+          <div style={{ display: "flex", gap: 10 }}>
             <button onClick={() => setAuthMode("login")}>Login</button>
             <button onClick={() => setAuthMode("register")}>Register</button>
           </div>
@@ -193,48 +188,43 @@ WhatsApp: +2347089724573`);
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", marginBottom: 8 }}
           />
           <input
-            placeholder="Password"
             type="password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", marginBottom: 8 }}
           />
           <button onClick={authMode === "login" ? doLogin : doRegister}>
-            {authMode === "login" ? "Login" : "Create Account"}
+            {authMode === "login" ? "Login" : "Register"}
           </button>
         </div>
       ) : (
         <>
-          <div style={{ marginBottom: 20 }}>
+          <div>
             Welcome <b>{user.email}</b>{" "}
-            {user.email === OWNER_EMAIL && "🔑 (Owner)"}
-            <button onClick={doLogout} style={{ marginLeft: 10 }}>
-              Logout
-            </button>
+            {user.email === OWNER_EMAIL && "(Owner)"}
+            <button onClick={doLogout}>Logout</button>
           </div>
 
           {user.email === OWNER_EMAIL ? (
-            // Owner dashboard
-            <div>
+            <>
               <h3>📦 Add Product</h3>
               <input
                 placeholder="Name"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
               <input
-                placeholder="Price"
                 type="number"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
+                placeholder="Price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
               />
               <input
                 placeholder="Image URL"
-                value={newImg}
-                onChange={(e) => setNewImg(e.target.value)}
+                value={img}
+                onChange={(e) => setImg(e.target.value)}
               />
               <button onClick={addProduct}>Add</button>
 
@@ -243,19 +233,13 @@ WhatsApp: +2347089724573`);
                 <div key={p.id}>
                   {editing === p.id ? (
                     <>
-                      <input
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                      />
+                      <input value={name} onChange={(e) => setName(e.target.value)} />
                       <input
                         type="number"
-                        value={newPrice}
-                        onChange={(e) => setNewPrice(e.target.value)}
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
                       />
-                      <input
-                        value={newImg}
-                        onChange={(e) => setNewImg(e.target.value)}
-                      />
+                      <input value={img} onChange={(e) => setImg(e.target.value)} />
                       <button onClick={() => updateProduct(p.id)}>Save</button>
                       <button onClick={() => setEditing(null)}>Cancel</button>
                     </>
@@ -265,9 +249,9 @@ WhatsApp: +2347089724573`);
                       <button
                         onClick={() => {
                           setEditing(p.id);
-                          setNewName(p.name);
-                          setNewPrice(p.price);
-                          setNewImg(p.img);
+                          setName(p.name);
+                          setPrice(p.price);
+                          setImg(p.img);
                         }}
                       >
                         Edit
@@ -281,9 +265,7 @@ WhatsApp: +2347089724573`);
               <h3>📑 Orders</h3>
               {orders.map((o) => (
                 <div key={o.id} style={{ marginBottom: 10 }}>
-                  <div>
-                    <b>{o.user}</b> — ₦{o.total} {o.paid ? "✅" : "❌"}
-                  </div>
+                  <b>{o.user}</b> — ₦{o.total} {o.paid ? "✅" : "❌"}
                   <ul>
                     {o.cart.map((i, idx) => (
                       <li key={idx}>
@@ -295,10 +277,9 @@ WhatsApp: +2347089724573`);
                   <button onClick={() => deleteOrder(o.id)}>Delete</button>
                 </div>
               ))}
-            </div>
+            </>
           ) : (
-            // Customer shop
-            <div>
+            <>
               <h3>🛍 Products</h3>
               <input
                 placeholder="Search..."
@@ -327,7 +308,7 @@ WhatsApp: +2347089724573`);
               <h3>🧾 My Receipts</h3>
               {myOrders.map((o) => (
                 <div key={o.id}>
-                  <b>Order {o.id}</b> ₦{o.total} {o.paid ? "✅" : "❌"}
+                  <b>Order</b> ₦{o.total} {o.paid ? "✅" : "❌"}
                   <ul>
                     {o.cart.map((i, idx) => (
                       <li key={idx}>
@@ -337,7 +318,7 @@ WhatsApp: +2347089724573`);
                   </ul>
                 </div>
               ))}
-            </div>
+            </>
           )}
         </>
       )}
