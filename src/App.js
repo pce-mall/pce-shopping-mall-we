@@ -13,7 +13,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-// 🔑 Owner email (only you will see the dashboard)
+// 🔑 Owner email
 const OWNER_EMAIL = "pceshoppingmall@gmail.com";
 
 function App() {
@@ -23,17 +23,15 @@ function App() {
   const [password, setPassword] = useState("");
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
-
-  // Products from Firestore
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Owner input fields
+  // Owner product input fields
   const [newName, setNewName] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newImg, setNewImg] = useState("");
 
-  // Watch login state
+  // Track login
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u || null));
     return () => unsub();
@@ -52,7 +50,7 @@ function App() {
     loadProducts();
   }, []);
 
-  // Filter products by search
+  // Filter search
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q.length
@@ -60,7 +58,7 @@ function App() {
       : products;
   }, [search, products]);
 
-  // Cart helpers
+  // Cart functions
   const addToCart = (p) => {
     setCart(prev => {
       const found = prev.find(i => i.id === p.id);
@@ -73,7 +71,7 @@ function App() {
   const decQty = (id) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i));
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
-  // Auth
+  // Auth functions
   const doRegister = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -88,7 +86,7 @@ function App() {
   };
   const doLogout = async () => { await signOut(auth); };
 
-  // Checkout with bank transfer
+  // Checkout
   const checkout = async () => {
     if (!user) return alert("Please login first");
     if (!cart.length) return alert("Your cart is empty");
@@ -116,7 +114,7 @@ WhatsApp: +2347089724573
     setCart([]);
   };
 
-  // Owner adds product
+  // Add product (Owner only)
   const addProduct = async () => {
     if (!newName || !newPrice || !newImg) return alert("Fill all fields");
     await addDoc(collection(db, "products"), {
@@ -168,11 +166,14 @@ WhatsApp: +2347089724573
         <>
           {/* Top bar */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div>Welcome <strong>{user.email}</strong></div>
+            <div>
+              Welcome <strong>{user.email}</strong> 
+              {user.email === OWNER_EMAIL && <span style={{ marginLeft: 10, color: "yellow" }}>🔑 Owner Mode</span>}
+            </div>
             <button onClick={doLogout} style={{ padding: "8px 12px", borderRadius: 8, border: "none" }}>Logout</button>
           </div>
 
-          {/* If owner, show dashboard */}
+          {/* Owner Dashboard */}
           {user.email === OWNER_EMAIL && (
             <div style={{ marginBottom: 24, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
               <h3>📦 Owner Dashboard - Add Product</h3>
@@ -206,7 +207,8 @@ WhatsApp: +2347089724573
                   <div style={{ marginTop: 8, fontWeight: 600 }}>{p.name}</div>
                   <div>₦{p.price.toLocaleString()}</div>
                   <button onClick={() => addToCart(p)}
-                          style={{ marginTop: 8, width: "100%", padding: 10, borderRadius: 8, border: "none", background: "#1f6feb", color: "white" }}>
+                          style={{ marginTop: 8, width: "100%", padding: 10, borderRadius: 8, border: "none",
+                                   background: "#1f6feb", color: "white" }}>
                     Add to Cart
                   </button>
                 </div>
