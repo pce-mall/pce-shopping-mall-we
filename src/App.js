@@ -11,6 +11,8 @@ import {
   addDoc,
   getDocs,
   serverTimestamp,
+  query,
+  orderBy,
 } from "firebase/firestore";
 
 // 🔑 Owner email
@@ -26,10 +28,14 @@ function App() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Owner product input fields
+  // Owner product input
   const [newName, setNewName] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newImg, setNewImg] = useState("");
+
+  // Orders (for owner)
+  const [orders, setOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
 
   // Track login
   useEffect(() => {
@@ -46,11 +52,24 @@ function App() {
     setLoading(false);
   };
 
+  // Load orders (only for owner)
+  const loadOrders = async () => {
+    setLoadingOrders(true);
+    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+    const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setOrders(list);
+    setLoadingOrders(false);
+  };
+
   useEffect(() => {
     loadProducts();
-  }, []);
+    if (user?.email === OWNER_EMAIL) {
+      loadOrders();
+    }
+  }, [user]);
 
-  // Filter search
+  // Filter products by search
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q.length
@@ -71,7 +90,7 @@ function App() {
   const decQty = (id) => setCart(prev => prev.map(i => i.id === id ? { ...i, qty: Math.max(1, i.qty - 1) } : i));
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
-  // Auth functions
+  // Auth
   const doRegister = async () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
@@ -140,7 +159,7 @@ WhatsApp: +2347089724573
       <p>Shop easily & pay with bank transfer.</p>
 
       {!user ? (
-        // Login/Register Box
+        // Login/Register
         <div style={{ maxWidth: 400, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
           <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
             <button onClick={() => setAuthMode("login")}
@@ -167,7 +186,7 @@ WhatsApp: +2347089724573
           {/* Top bar */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <div>
-              Welcome <strong>{user.email}</strong> 
+              Welcome <strong>{user.email}</strong>
               {user.email === OWNER_EMAIL && <span style={{ marginLeft: 10, color: "yellow" }}>🔑 Owner Mode</span>}
             </div>
             <button onClick={doLogout} style={{ padding: "8px 12px", borderRadius: 8, border: "none" }}>Logout</button>
@@ -176,7 +195,10 @@ WhatsApp: +2347089724573
           {/* Owner Dashboard */}
           {user.email === OWNER_EMAIL && (
             <div style={{ marginBottom: 24, background: "rgba(0,0,0,0.6)", padding: 16, borderRadius: 12 }}>
-              <h3>📦 Owner Dashboard - Add Product</h3>
+              <h3>📦 Owner Dashboard</h3>
+
+              {/* Add product */}
+              <h4>Add Product</h4>
               <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Product Name"
                      style={{ width: "100%", padding: 8, marginBottom: 8 }} />
               <input value={newPrice} onChange={e=>setNewPrice(e.target.value)} placeholder="Price (₦)" type="number"
@@ -186,6 +208,30 @@ WhatsApp: +2347089724573
               <button onClick={addProduct} style={{ width: "100%", padding: 10, borderRadius: 8, border: "none", background: "#22c55e", color: "white" }}>
                 Add Product
               </button>
+
+              {/* Orders list */}
+              <h4 style={{ marginTop: 20 }}>📑 Orders</h4>
+              {loadingOrders ? (
+                <div>Loading orders...</div>
+              ) : !orders.length ? (
+                <div>No orders yet.</div>
+              ) : (
+                <div style={{ marginTop: 10, display: "grid", gap: 12 }}>
+                  {orders.map(order => (
+                    <div key={order.id} style={{ background: "rgba(255,255,255,0.1)", padding: 12, borderRadius: 8 }}>
+                      <div><strong>Customer:</strong> {order.user}</div>
+                      <div><strong>Total:</strong> ₦{order.total.toLocaleString()}</div>
+                      <div><strong>Status:</strong> {order.paid ? "✅ Paid" : "❌ Not Paid"}</div>
+                      <div><strong>Items:</strong></div>
+                      <ul>
+                        {order.cart.map((item, idx) => (
+                          <li key={idx}>{item.qty} × {item.name} (₦{item.price.toLocaleString()})</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
