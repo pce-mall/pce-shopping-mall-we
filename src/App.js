@@ -1,4 +1,4 @@
- import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { auth, db } from "./firebase";
 import {
   createUserWithEmailAndPassword,
@@ -472,6 +472,7 @@ WhatsApp: +2347089724573
                     background: "rgba(255,255,255,0.1)",
                     padding: 12,
                     borderRadius: 8,
+                    marginBottom: 10,
                   }}
                 >
                   {editingProduct === p.id ? (
@@ -572,36 +573,27 @@ WhatsApp: +2347089724573
                     background: "rgba(255,255,255,0.1)",
                     padding: 12,
                     borderRadius: 8,
+                    marginBottom: 12,
                   }}
                 >
                   <div>
                     <strong>Customer:</strong> {order.user}
                   </div>
                   <div>
-                    <strong>Total:</strong> ₦
-                    {order.total.toLocaleString()}
+                    <strong>Total:</strong> ₦{order.total.toLocaleString()}
                   </div>
                   <div>
                     <strong>Status:</strong>{" "}
                     {order.paid ? "✅ Paid" : "❌ Not Paid"}
                   </div>
+                  <h4>Items:</h4>
                   <ul>
                     {order.cart.map((item, idx) => (
                       <li key={idx}>
-                        {item.qty} × {item.name} (₦
-                        {item.price.toLocaleString()})
+                        {item.qty} × {item.name} (₦{item.price.toLocaleString()}
+                        )
                       </li>
                     ))}
                   </ul>
                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                    {!order.paid && (
-                      <button
-                        onClick={() => markAsPaid(order.id)}
-                        style={{
-                          flex: 1,
-                          padding: 6,
-                          borderRadius: 6,
-                          border: "none",
-                          background: "#16a34a",
-                          color: "white",
-                        }}
+                    {!order.paid
