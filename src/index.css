@@ -1,42 +1,17 @@
-/* Reset */
-* {
+/* Basic global styles */
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-/* Background */
-body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(90deg, blue, green, black);
+  background-color: #000; /* fallback */
   color: white;
-  min-height: 100vh;
 }
 
-/* Root container */
-#root {
-  padding: 20px;
+/* Make sure all inputs/buttons look clean */
+input, button {
+  font-family: inherit;
 }
 
-/* Buttons */
 button {
   cursor: pointer;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-button:hover {
-  opacity: 0.9;
-}
-
-/* Inputs */
-input {
-  outline: none;
-  padding: 8px;
-  border-radius: 6px;
-  border: none;
-  margin-bottom: 8px;
-  font-size: 14px;
-  width: 100%;
 }
