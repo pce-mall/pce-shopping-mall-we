@@ -2,4 +2,23 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
+  background: linear-gradient(to right, blue, green, black);
+  color: white;
+}
+button {
+  background: yellow;
+  border: none;
+  padding: 8px 12px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+button:hover {
+  opacity: 0.8;
+}
+input {
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+  margin: 5px;
 }
