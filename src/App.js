@@ -1,35 +1,23 @@
 // src/App.js
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import OwnerLogin from "./pages/OwnerLogin";
-import OwnerDashboard from "./pages/OwnerDashboard";
-import AddProduct from "./pages/AddProduct";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
-import { auth } from "./firebase";
-import { onAuthStateChanged } from "firebase/auth";
+function Ping() {
+  return (
+    <div style={{ padding: 24 }}>
+      <h1>✅ App is Alive</h1>
+      <p>Routing works. Now wire your real pages.</p>
+      <p><Link to="/login">Go to Owner Login</Link></p>
+    </div>
+  );
+}
 
 function App() {
-  const [user, setUser] = React.useState(null);
-
-  React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<OwnerLogin />} />
-        <Route
-          path="/owner-dashboard"
-          element={user ? <OwnerDashboard /> : <OwnerLogin />}
-        />
-        <Route
-          path="/add-product"
-          element={user ? <AddProduct /> : <OwnerLogin />}
-        />
+        <Route path="/" element={<Ping />} />
+        <Route path="*" element={<Ping />} />
       </Routes>
     </Router>
   );
