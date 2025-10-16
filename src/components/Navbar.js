@@ -51,7 +51,7 @@ export default function Navbar() {
           <Link to="/" style={navLinkStyle(pathname === "/")}>Home</Link>
           <Link to="/cart" style={navLinkStyle(pathname === "/cart")}>Cart</Link>
           <Link to="/checkout" style={navLinkStyle(pathname === "/checkout")}>Checkout</Link>
-          <Link to="/login" style={navLinkStyle(pathname === "/login")}>Owner</Link>
+          <Link to="/owner" style={navLinkStyle(pathname === "/owner")}>Owner</Link>
         </nav>
       </div>
     </header>
