@@ -1,62 +1,55 @@
 // src/App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import Cart from "./components/Cart";
 import Checkout from "./components/Checkout";
-import Invoice from "./components/Invoice";
 import OwnerDashboard from "./components/OwnerDashboard";
 import AddProduct from "./components/AddProduct";
-
-// If your owner login file is named AdminLogin.js (as in your repo screenshot):
-import AdminLogin from "./components/AdminLogin";
-
-// Firebase auth watcher
-import { auth } from "./firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import Invoice from "./components/Invoice";
+import Footer from "./components/Footer";
 
 function App() {
-  const [user, setUser] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
-
-  if (loading) {
-    return <div style={{ padding: 24 }}>Loading…</div>;
-  }
-
   return (
     <Router>
       <Navbar />
       <Routes>
-        {/* public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/invoice/:orderId" element={<Invoice />} />
-
-        {/* owner routes (protected) */}
-        <Route path="/login" element={<AdminLogin />} />
-        <Route
-          path="/owner-dashboard"
-          element={user ? <OwnerDashboard /> : <AdminLogin />}
-        />
-        <Route
-          path="/add-product"
-          element={user ? <AddProduct /> : <AdminLogin />}
-        />
-
-        {/* fallback to home so no white screen */}
-        <Route path="*" element={<Home />} />
+        <Route path="/owner" element={<OwnerDashboard />} />
+        <Route path="/add-product" element={<AddProduct />} />
+        <Route path="/invoice" element={<Invoice />} />
       </Routes>
+      <Footer />
+
+      {/* Floating WhatsApp Button */}
+      <a
+        href="https://wa.me/2347089724573"
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          position: "fixed",
+          right: 16,
+          bottom: 16,
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: "#25D366",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: 26,
+          boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+          zIndex: 60,
+          textDecoration: "none",
+        }}
+        aria-label="Chat on WhatsApp"
+      >
+        🟢
+      </a>
     </Router>
   );
 }
