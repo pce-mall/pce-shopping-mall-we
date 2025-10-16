@@ -1,4 +1,4 @@
-// src/components/Home.js  (if your file lives in components/)
+// src/components/Home.js
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
