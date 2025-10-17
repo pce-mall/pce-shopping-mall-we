@@ -1,7 +1,7 @@
 // src/pages/OwnerLogin.js
 import React, { useState } from "react";
-import { auth } from "../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 
 export default function OwnerLogin() {
@@ -14,29 +14,28 @@ export default function OwnerLogin() {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/owner-dashboard"); // redirect after login
+      navigate("/owner-dashboard"); // ✅ go to dashboard after login
     } catch (err) {
-      setError("❌ Invalid email or password");
+      setError("Login failed. Please check your email/password.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
+    <div className="flex h-screen items-center justify-center bg-gray-100">
       <form
         onSubmit={handleLogin}
-        className="bg-white shadow-lg rounded-lg p-6 w-96"
+        className="bg-white p-8 rounded-lg shadow-md w-96"
       >
-        <h1 className="text-2xl font-bold text-center text-green-700 mb-4">
-          👔 Owner Login
-        </h1>
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-
+        <h2 className="text-2xl font-bold mb-6 text-center text-green-700">
+          Owner Login
+        </h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border p-2 mb-3 rounded"
+          className="w-full px-4 py-2 border rounded-lg mb-4"
           required
         />
         <input
@@ -44,17 +43,16 @@ export default function OwnerLogin() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 mb-3 rounded"
+          className="w-full px-4 py-2 border rounded-lg mb-4"
           required
         />
-
         <button
           type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
         >
           Login
         </button>
       </form>
     </div>
   );
-        }
+}
