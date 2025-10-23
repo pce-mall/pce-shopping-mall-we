@@ -1,50 +1,80 @@
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
+/* Base styles */
+body {
+  margin: 0;
+  font-family: 'Poppins', Arial, sans-serif;
+  background-color: #f9fafc;
+  color: #222;
 }
-.card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 15px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  text-align: center;
-}
-.card img {
-  width: 100%;
-  border-radius: 10px;
-  height: 160px;
-  object-fit: cover;
-}
-.cart-item {
+
+/* Hero Section */
+.hero {
+  position: relative;
+  background: url('https://images.unsplash.com/photo-1603791452906-b30b53df74f6?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+  height: 75vh;
   display: flex;
-  gap: 15px;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  align-items: center;
+  justify-content: center;
 }
-.cart-item img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
+.overlay {
+  background: rgba(0, 0, 0, 0.55);
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  color: #fff;
+}
+.overlay h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.overlay h1 span {
+  color: #FF7A00;
+}
+.overlay p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
 }
 .button {
-  background: #0B65C2;
+  display: inline-block;
+  background: #FF7A00;
   color: #fff;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-weight: 600;
   text-decoration: none;
+  transition: 0.3s;
 }
-.button.danger {
-  background: #FF3B30;
+.button:hover {
+  background: #e06700;
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
+
+/* Custom content section */
+.custom-section {
+  background: #fff;
+  margin: 3rem auto;
+  padding: 2rem;
+  max-width: 900px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
   text-align: center;
+}
+.custom-section h2 {
+  color: #0B65C2;
+}
+.custom-section p {
+  color: #444;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .overlay {
+    padding: 25px;
+  }
+  .overlay h1 {
+    font-size: 1.5rem;
+  }
+  .custom-section {
+    margin: 2rem 1rem;
+    padding: 1.5rem;
+  }
 }
