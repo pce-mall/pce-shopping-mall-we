@@ -96,3 +96,52 @@ a.button, .container a {
     padding: 1rem;
   }
 }
+/* --- HERO SECTION --- */
+.hero {
+  background: url('https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+  color: #fff;
+  text-align: center;
+  padding: 120px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-content {
+  background: rgba(0, 0, 0, 0.55);
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 700px;
+}
+.hero-content h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.hero-content h1 span {
+  color: #FF7A00;
+}
+.hero-content p {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.hero-button {
+  display: inline-block;
+  background: #FF7A00;
+  color: #fff;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.hero-button:hover {
+  background: #e06d00;
+}
+
+/* Adjust for mobile */
+@media (max-width: 600px) {
+  .hero {
+    padding: 100px 15px;
+  }
+  .hero-content h1 {
+    font-size: 1.5rem;
+  }
+}
