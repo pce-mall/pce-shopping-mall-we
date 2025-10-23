@@ -1,0 +1,9 @@
+body { margin: 0; font-family: Arial, sans-serif; }
+.nav { background: #fff; border-bottom: 1px solid #eee; }
+.nav-inner { display: flex; justify-content: space-between; padding: 1rem; align-items: center; }
+.brand { font-weight: 800; color: #0B65C2; display: flex; align-items: center; gap: 8px; }
+.brand .dot { width: 10px; height: 10px; border-radius: 50%; background: #FF7A00; }
+.menu { display: flex; gap: 1rem; align-items: center; }
+.menu a { color: #0B65C2; text-decoration: none; font-weight: 600; }
+.menu a.cta { background: #FF7A00; color: #fff; padding: 8px 12px; border-radius: 6px; }
+.footer { background: #0B65C2; color: #fff; padding: 1rem; text-align: center; }
