@@ -3,20 +3,31 @@ export default function Home() {
     <section className="home">
       <div className="hero">
         <div className="overlay">
-          <h1>Welcome to <span>PCE Shopping Mall</span></h1>
+          <h1>
+            Welcome to <span>PCE Shopping Mall</span>
+          </h1>
           <p>Shop Smart. Earn Easy. Worldwide Delivery.</p>
-          <a href="https://wa.me/2347089724573" className="button">
+          <a
+            href="https://wa.me/2347089724573"
+            className="button"
+            target="_blank"
+            rel="noreferrer"
+          >
             Shop Now
           </a>
         </div>
       </div>
 
-      {/* ==== CUSTOM AREA YOU CAN EDIT ANYTIME ==== */}
+      {/* ==== YOUR EDITABLE AREA ==== */}
       <div className="custom-section">
-        <h2>🛍 Latest Offers</h2>
-        <p>Add your latest products, promotions, or announcements here!</p>
+        <h2>🛍 Add Your Content Here</h2>
+        <p>
+          You can add your new offers, latest products, announcements, or
+          anything else here — just edit this text directly in
+          <strong> Home.jsx</strong>.
+        </p>
       </div>
-      {/* ========================================== */}
+      {/* ============================ */}
     </section>
   );
 }
