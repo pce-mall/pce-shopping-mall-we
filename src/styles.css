@@ -1,9 +1,98 @@
-body { margin: 0; font-family: Arial, sans-serif; }
-.nav { background: #fff; border-bottom: 1px solid #eee; }
-.nav-inner { display: flex; justify-content: space-between; padding: 1rem; align-items: center; }
-.brand { font-weight: 800; color: #0B65C2; display: flex; align-items: center; gap: 8px; }
-.brand .dot { width: 10px; height: 10px; border-radius: 50%; background: #FF7A00; }
-.menu { display: flex; gap: 1rem; align-items: center; }
-.menu a { color: #0B65C2; text-decoration: none; font-weight: 600; }
-.menu a.cta { background: #FF7A00; color: #fff; padding: 8px 12px; border-radius: 6px; }
-.footer { background: #0B65C2; color: #fff; padding: 1rem; text-align: center; }
+body {
+  margin: 0;
+  font-family: "Poppins", Arial, sans-serif;
+  background-color: #f8f9fc;
+  color: #222;
+}
+
+/* Navbar */
+.nav {
+  background: #0B65C2;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.nav-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+}
+.brand {
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FF7A00;
+}
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.menu a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+.menu a.cta {
+  background: #FF7A00;
+  padding: 6px 12px;
+  border-radius: 5px;
+}
+
+/* Page content */
+.container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+.container h1, .container h2 {
+  color: #0B65C2;
+}
+
+/* Buttons */
+a.button, .container a {
+  text-decoration: none;
+}
+.button {
+  display: inline-block;
+  margin-top: 1rem;
+  background: #0B65C2;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* Footer */
+.footer {
+  background: #0B65C2;
+  color: #fff;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 3rem;
+}
+.footer a {
+  color: #fff;
+  text-decoration: underline;
+  margin: 0 8px;
+  font-weight: 500;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .menu {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .container {
+    padding: 1rem;
+  }
+}
