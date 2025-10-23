@@ -1,4 +1,3 @@
-/* Base styles */
 body {
   margin: 0;
   font-family: 'Poppins', Arial, sans-serif;
@@ -6,17 +5,18 @@ body {
   color: #222;
 }
 
-/* Hero Section */
+/* HERO SECTION */
 .hero {
   position: relative;
-  background: url('https://images.unsplash.com/photo-1603791452906-b30b53df74f6?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+  background: url('https://images.unsplash.com/photo-1606813902784-87bbf7f98b53?auto=format&fit=crop&w=1600&q=80')
+    center/cover no-repeat;
   height: 75vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .overlay {
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
   padding: 40px;
   border-radius: 12px;
   text-align: center;
@@ -27,7 +27,7 @@ body {
   margin-bottom: 1rem;
 }
 .overlay h1 span {
-  color: #FF7A00;
+  color: #ff7a00;
 }
 .overlay p {
   font-size: 1.1rem;
@@ -35,7 +35,7 @@ body {
 }
 .button {
   display: inline-block;
-  background: #FF7A00;
+  background: #ff7a00;
   color: #fff;
   padding: 10px 25px;
   border-radius: 8px;
@@ -47,7 +47,7 @@ body {
   background: #e06700;
 }
 
-/* Custom content section */
+/* EDITABLE CUSTOM SECTION */
 .custom-section {
   background: #fff;
   margin: 3rem auto;
@@ -58,14 +58,15 @@ body {
   text-align: center;
 }
 .custom-section h2 {
-  color: #0B65C2;
+  color: #0b65c2;
+  margin-bottom: 1rem;
 }
 .custom-section p {
   color: #444;
   font-size: 1rem;
 }
 
-/* Responsive */
+/* RESPONSIVE */
 @media (max-width: 600px) {
   .overlay {
     padding: 25px;
